@@ -1,15 +1,14 @@
-A sample app demonstrating the use of the Evernote API in a Windows 8 Metro style app. 
+A sample app demonstrating the use of the Evernote API in a Windows Store (aka Metro Style) app for Windows 8. 
 
 -----
 
-To use the demo, update EvernoteWrapper/Wrapper.cs with your Evernote API key and TestApp/BlankPage.xaml.cs with your Evernote sandbox username and password.
+To use the demo, update TestApp/BlankPage.xaml.cs with your Evernote sandbox developer token, which you can get by visiting https://sandbox.evernote.com/api/DeveloperToken.action.
 
-If you don't have an API key, you can get one at http://dev.evernote.com/documentation/cloud.
-
+Note that a real application will authenticate using OAuth, which is not demonstrated in this sample. We're merely attempting to demonstrate how to wrap our C# SDK into a Windows Store app.
 -----
 
 The Evernote SDK is contained in the Evernote project, which builds into a class library.
 
 The business logic that exercises the SDK is contained in the EvernoteWrapper project, which builds into a WinMD File.
 
-The C# Metro app uses the APIs exposed by the EvernoteWrapper project to do useful things.
+The sample app uses the APIs exposed by the EvernoteWrapper project to do useful things.
