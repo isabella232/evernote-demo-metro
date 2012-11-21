@@ -33,13 +33,8 @@ namespace EvernoteWrapper
 
         private String evernoteHost = "sandbox.evernote.com";
 
-        // Replace these with your API key values
-        private String consumerKey = "your key";
-        private String consumerSecret = "your secret";
-
         private UserStore.Client userStore;
         private String authToken;
-        private DateTime tokenExpires;
         private String noteStoreUrl;
 
         // Base-64 encoded Evernote icon that we can add into a new note 
@@ -54,21 +49,6 @@ namespace EvernoteWrapper
         }
 
         /// <summary>
-        /// Updated cached authentication information with the values in the specified
-        /// AuthenticationResult.
-        /// </summary>
-        private void updateAuth(AuthenticationResult result)
-        {
-            authToken = result.AuthenticationToken;
-            noteStoreUrl = result.NoteStoreUrl;
-
-            // Calculate the token expiration time, accounting for clock skew 
-            long durationMillis = result.Expiration - result.CurrentTime;
-            TimeSpan duration = TimeSpan.FromMilliseconds(durationMillis);
-            tokenExpires = DateTime.UtcNow.Add(duration);
-        }
-
-        /// <summary>
         /// Make sure we have a valid auth token. Refreshes if possible, otherwise re-authenticates
         /// using username and password. Throws an TApplicationException, TTransportException, 
         /// EDAMUserException or EDAMSystemException if an error occurs.
@@ -77,31 +57,8 @@ namespace EvernoteWrapper
         /// True if a valid auth token was obtained, false if the Evernote service won't speak to us 
         /// because our protocol version is out-of-date.
         /// </returns>
-        private bool auth(String username, String password)
+        private bool auth(String authToken)
         {
-            if (authToken != null)
-            {
-                // See if our authToken is going to expire in the next 15 minutes
-                if (tokenExpires <= DateTime.UtcNow.AddMinutes(-15))
-                {
-                    // We have an authToken that doesn't expire for at least 15 minutes
-                    return true;
-                }
-                else if (tokenExpires <= DateTime.UtcNow)
-                {
-                    // We have an authToken that we can refresh
-                    try
-                    {
-                        updateAuth(userStore.refreshAuthentication(authToken));
-                        return true;
-                    }
-                    catch (EDAMUserException)
-                    {
-                        // Maybe we can't refresh it ... fall through and authenticate again
-                    }
-                }
-            }
-
             // We need to authenticate - first make sure we're allowed to speak to the service
             if (!userStore.checkVersion(APP_NAME,
                 Evernote.EDAM.UserStore.Constants.EDAM_VERSION_MAJOR,
@@ -110,21 +67,22 @@ namespace EvernoteWrapper
                 return false;
             }
 
-            updateAuth(userStore.authenticate(username, password, consumerKey, consumerSecret));
+            this.authToken = authToken;
+            noteStoreUrl = userStore.getNoteStoreUrl(authToken);
             return true;
         }
 
         /// <summary>
-        /// Create a new note in the account of the user with the specified Evernote username and password.
+        /// Create a new note in the account of the user with the specified developer token.
         /// </summary>
         /// <returns>true if the note was created successfully, false otherwise.</returns>
-        public bool createNote(String username, String password)
+        public bool createNote(String developerToken)
         {
             try
             {
                 try
                 {
-                    if (!auth(username, password))
+                    if (!auth(developerToken))
                     {
                         // This is an unrecoverable error - our protocol version is out of date
                         return false;
@@ -132,33 +90,7 @@ namespace EvernoteWrapper
                 }
                 catch (EDAMUserException eux)
                 {
-                    // I'm showing some of the most common error codes here that we might want to handle separately.
-                    // For the full list, see 
-                    // http://dev.evernote.com/documentation/reference/UserStore.html#Fn_UserStore_authenticate
-                    if (eux.ErrorCode == EDAMErrorCode.INVALID_AUTH)
-                    {
-                        if (eux.Parameter == "username" || eux.Parameter == "password")
-                        {
-                            // We failed to authenticate because the username or password was invalid
-                            // This is a recoverable error that the user can fix
-                        }
-                        else
-                        {
-                            // Our API key was invalid, or something else wonky happened
-                            // The user can't help us recover from this
-                        }
-                    }
-                    else if (eux.ErrorCode == EDAMErrorCode.PERMISSION_DENIED)
-                    {
-                        if (eux.Parameter == "User.active")
-                        {
-                            // The credentials were correct, but this user account is not active
-                        }
-                    }
-                    else
-                    {
-                        // We failed to authenticate for some other reason
-                    }
+                    // TODO - do proper error handling
                     return false;
                 }
 
@@ -189,7 +121,7 @@ namespace EvernoteWrapper
                 Note note = new Note();
                 note.Title = "Hello, World!";
                 note.Content = EDAM_NOTE_PREAMBLE + 
-                    "<h2>This note is created by Skitch for Metro!</h2>" + 
+                    "<h2>This note is created by the Evernote sample code for Windows Store applications!</h2>" + 
                     "<br />" +
                     "<en-media type=\"image/png\" hash=\"" + hashHex + "\"/>" +
                     EDAM_NOTE_POSTAMBLE;

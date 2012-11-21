@@ -44,7 +44,7 @@ namespace TestApp
         private void HelloButton_Click(object sender, RoutedEventArgs e)
         {
             EvernoteWrapper.Wrapper wrapper = new EvernoteWrapper.Wrapper();
-            DisplayText.Text = "Result:" + wrapper.createNote("your username", "your password");        
+            DisplayText.Text = "Result:" + wrapper.createNote("Your developer token");        
         }
     }
 }

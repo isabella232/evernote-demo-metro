@@ -9,8 +9,8 @@
     <ProjectGuid>{02F79E99-9DE9-4F11-883E-34F91ED83877}</ProjectGuid>
     <OutputType>winmdobj</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EDAMWrapper</RootNamespace>
-    <AssemblyName>EDAMWrapper</AssemblyName>
+    <RootNamespace>EvernoteWrapper</RootNamespace>
+    <AssemblyName>EvernoteWrapper</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
